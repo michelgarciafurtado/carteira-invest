@@ -1,2 +1,6 @@
 <Solution>
+  <Project Path="CarteiraInvest.Api/CarteiraInvest.Api.csproj" />
+  <Project Path="CarteiraInvest.Application/CarteiraInvest.Application.csproj" Id="b164a5d0-db1d-4ef4-bc08-7e6927e50d8f" />
+  <Project Path="CarteiraInvest.Domain/CarteiraInvest.Domain.csproj" Id="006cf57e-e649-4f81-88b3-eb906ac5f24c" />
+  <Project Path="CarteiraInvest.Infra/CarteiraInvest.Infra.csproj" Id="42bf2254-64f1-4630-86e8-ce27b1f24006" />
 </Solution>

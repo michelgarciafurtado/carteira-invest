@@ -1,0 +1,22 @@
+# Etapa 1: Build e Publish
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copia os arquivos de projeto (.csproj) e restaura as dependências
+COPY CarteiraInvest.Api/*.csproj CarteiraInvest.Api/
+COPY CarteiraInvest.Application/*.csproj CarteiraInvest.Application/
+COPY CarteiraInvest.Domain/*.csproj CarteiraInvest.Domain/
+COPY CarteiraInvest.Infra/*.csproj CarteiraInvest.Infra/
+RUN dotnet restore CarteiraInvest.Api/CarteiraInvest.Api.csproj
+
+# Copia o código-fonte e compila
+COPY . .
+WORKDIR /src/CarteiraInvest.Api
+RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
+
+# Etapa 2: Execução (Runtime)
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+EXPOSE 8080
+ENTRYPOINT ["dotnet", "CarteiraInvest.Api.dll"]

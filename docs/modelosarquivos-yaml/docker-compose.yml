@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # --- BANCO DE DADOS POSTGRESQL ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: carteira_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-carteiradb}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-suasenha123}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - carteira_network
+
+  # --- CACHE REDIS ---
+  redis:
+    image: redis:7-alpine
+    container_name: carteira_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - carteira_network
+
+  # --- BACKEND .NET ---
+  api:
+    build:
+      context: ../app/src/CarteiraInvest
+      dockerfile: Dockerfile
+    container_name: carteira_api
+    restart: always
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Database=${POSTGRES_DB:-carteiradb};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-suasenha123}
+      - ConnectionStrings__Redis=redis:6379
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "5000:8080"
+    networks:
+      - carteira_network
+
+  # --- FRONTEND ANGULAR ---
+  frontend:
+    build:
+      context: ../front
+      dockerfile: Dockerfile
+    container_name: carteira_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - carteira_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  carteira_network:
+    driver: bridge
