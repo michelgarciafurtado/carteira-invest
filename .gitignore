@@ -1,0 +1,29 @@
+# --- IDEs e Editores ---
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# --- Node / Angular (Frontend) ---
+front/node_modules/
+front/dist/
+front/.angular/
+front/.vscode/
+*.log
+
+# --- .NET / C# (Backend) ---
+**/bin/
+**/obj/
+**/appsettings.Development.json
+**/appsettings.Production.json
+
+# --- Deploy e Arquivos de Ambiente ---
+deploy/.env
+*.env
+
+# --- Arquivos do Sistema Operacional ---
+.DS_Store
+Thumbs.db
