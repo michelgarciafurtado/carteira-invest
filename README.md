@@ -1,6 +1,7 @@
 # CarteiraInvest
 
 Sistema fullstack de gerenciamento e acompanhamento de carteira de investimentos.
+[Link para documentação no miro:](https://miro.com/app/board/uXjVEYtcPi0=/?share_link_id=678945879539)
 
 ## 🛠️ Tecnologias Utilizadas
 
