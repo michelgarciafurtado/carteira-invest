@@ -1,0 +1,138 @@
+﻿using CarteiraInvest.Domain.Aggregates;
+using CarteiraInvest.Domain.ValueObject;
+using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Text;
+
+namespace CarteiraInvest.Domain.Entities;
+
+public class AcaoCarteira:BaseEntity
+{
+    public string Symbol { get; private set; }
+    public Acao Acao { get; private set; }
+    public DateTimeOffset? DataUltimaCotacao { get; private set; }
+    public decimal? PrecoUltimaCotacao { get; private set; }
+    public Guid InvestidorId { get; private set; }
+    public Investidor Investidor { get; private set; }
+    public Guid CorretoraId { get; private set; }
+    public Corretora Corretora { get; private set; }
+    public decimal PrecoMedio { get; private set; }
+    public int Quantidade { get; private set; }
+    public decimal ValorInvestido { get; private set; }
+    public decimal ValorAtual { get; private set; }
+    public decimal LucroPrejuizo { get; private set; }
+    public decimal PercentualLucroPrejuizo { get; private set; }
+    private readonly List<AcaoTransacao> _transacoes = [];
+    public IReadOnlyCollection<AcaoTransacao> Transacoes
+        => _transacoes.AsReadOnly();
+
+    public AcaoCarteira(string symbol, Guid investidorId, Guid corretoraId)
+    {
+        if(string.IsNullOrWhiteSpace(symbol))
+            throw new ArgumentException("O símbolo da ação não pode ser nulo ou vazio.", nameof(symbol));
+        
+        if (investidorId == Guid.Empty)
+            throw new ArgumentException("Investidor inválido.", nameof(investidorId));
+
+        if (corretoraId == Guid.Empty)
+            throw new ArgumentException("Corretora inválida.", nameof(corretoraId));
+
+        Symbol = symbol.Trim().ToUpper();
+        InvestidorId = investidorId;
+        CorretoraId = corretoraId;
+    }
+    public void AtualizarCotacao(DateTimeOffset dataCotacao, decimal precoUltimaCotacao)
+    {
+        var dataUtc = dataCotacao.ToUniversalTime();
+
+        if (DataUltimaCotacao.HasValue &&
+            dataUtc < DataUltimaCotacao.Value)
+        {
+            throw new InvalidOperationException(
+                "A cotação recebida é anterior à última registrada.");
+        }
+
+        if (precoUltimaCotacao <= 0)
+            throw new ArgumentException("Preço da última cotação deve ser maior que zero.", nameof(precoUltimaCotacao));
+
+        DataUltimaCotacao = dataCotacao;
+        PrecoUltimaCotacao = precoUltimaCotacao;
+
+        RecalcularValoresMercado();
+    }
+
+    public void AdicionarTransacao(AcaoTransacao transacao)
+    {
+        if (transacao == null)
+        {
+            throw new ArgumentNullException(nameof(transacao), "A transação não pode ser nula.");
+        }
+        _transacoes.Add(transacao);
+
+        RecalcularPosicao();
+        RecalcularValoresMercado();
+    }
+
+    public void RecalcularPosicao()
+    {
+        PrecoMedio = CalcularPrecoMedio();
+        Quantidade = CalcularQuantidade();
+        ValorInvestido = CalcularValorInvestido();
+    }
+
+    public void RecalcularValoresMercado()
+    {
+        ValorAtual = CalcularValorAtual();
+        LucroPrejuizo = CalcularLucroPrejuizo();
+        PercentualLucroPrejuizo = CalcularPercentualLucroPrejuizo();
+    }
+
+    private decimal CalcularPrecoMedio()
+    {
+        decimal custoTotal = 0;
+        int quantidadeTotal = 0;
+        foreach (var transacao in _transacoes.OrderBy(t => t.DataOperacao))
+        {
+            if (transacao.TipoOperacao == TipoOperacaoEnum.Compra)
+            {
+                custoTotal += transacao.PrecoUnitario * transacao.Quantidade;
+                quantidadeTotal += transacao.Quantidade;
+            }
+            else if (transacao.TipoOperacao == TipoOperacaoEnum.Venda)
+            {
+                decimal precoMedioAtual = custoTotal / quantidadeTotal;
+
+                custoTotal -= transacao.PrecoUnitario * transacao.Quantidade;
+                quantidadeTotal -= transacao.Quantidade;
+            }
+        }
+        return quantidadeTotal > 0 ? custoTotal / quantidadeTotal : 0;
+    }
+
+    private int CalcularQuantidade()
+    {
+        throw new NotImplementedException();
+    }
+
+    private decimal CalcularValorInvestido()
+    {
+        throw new NotImplementedException();
+    }
+    
+    //calculos que dependem do preço atual da ação
+    private decimal CalcularValorAtual()
+    {
+        throw new NotImplementedException();
+    }
+
+    private decimal CalcularLucroPrejuizo()
+    {
+        throw new NotImplementedException();
+    }
+
+    private decimal CalcularPercentualLucroPrejuizo()
+    {
+        throw new NotImplementedException();
+    }
+}
