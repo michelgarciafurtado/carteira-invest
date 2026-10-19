@@ -101,10 +101,19 @@ public class AcaoCarteira:BaseEntity
             }
             else if (transacao.TipoOperacao == TipoOperacaoEnum.Venda)
             {
+                if(quantidadeTotal <= 0)
+                {
+                    throw new InvalidOperationException("Não é possível vender ações, pois não há ações disponíveis na carteira.");
+                }
+                if (transacao.Quantidade > quantidadeTotal)
+                {
+                    throw new InvalidOperationException("Não é possível vender mais ações do que a quantidade disponível na carteira.");
+                }
                 decimal precoMedioAtual = custoTotal / quantidadeTotal;
 
-                custoTotal -= transacao.PrecoUnitario * transacao.Quantidade;
                 quantidadeTotal -= transacao.Quantidade;
+
+                custoTotal -= quantidadeTotal * precoMedioAtual;
             }
         }
         return quantidadeTotal > 0 ? custoTotal / quantidadeTotal : 0;
