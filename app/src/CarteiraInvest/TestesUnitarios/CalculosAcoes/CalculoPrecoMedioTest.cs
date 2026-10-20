@@ -25,7 +25,7 @@ public class CalculoPrecoMedioTest
     }
 
     [Test]
-    public void CalculaPrecoMedio_DevePassar()
+    public void CalcularPrecoMedio_DevePassar()
     {
         petrobras.AdicionarTransacao(compra1);
         petrobras.AdicionarTransacao(compra2);
@@ -33,6 +33,40 @@ public class CalculoPrecoMedioTest
         petrobras.AdicionarTransacao(venda1);
         petrobras.AdicionarTransacao(Compra4);
 
+        Assert.That(petrobras.PrecoMedio.Valor, Is.EqualTo(101.90m));
+    }
+
+    [Test]
+    public void CalcularPrecoMedio_SemTransacoes_DeveSerZero()
+    {
+        Assert.That(petrobras.PrecoMedio.Valor, Is.EqualTo(0.0m));
+    }
+
+    [Test]
+    public void VendaMaiorQueQuantidade_DeveLancarExcecao()
+    {
+        petrobras.AdicionarTransacao(compra1);
+        petrobras.AdicionarTransacao(compra2);
+        var vendaInvalida = new AcaoTransacao("PETR4", investidorId, TipoOperacaoEnum.Venda, DateTime.Now, 110.0m, 30);
+        Assert.Throws<InvalidOperationException>(() => petrobras.AdicionarTransacao(vendaInvalida));
+    }
+    [Test]
+    public void CompraLancadaForaDeOrdemCronologica_DevePassar()
+    {
+        petrobras.AdicionarTransacao(compra3);
+        petrobras.AdicionarTransacao(compra2);
+        petrobras.AdicionarTransacao(compra1);
+        Assert.That(petrobras.PrecoMedio.Valor, Is.EqualTo(97.78m));
+    }
+
+    [Test]
+    public void VendaLancadaForaDeOrdemCronologica_DevePassar()
+    {
+        petrobras.AdicionarTransacao(compra1);
+        petrobras.AdicionarTransacao(compra2);
+        petrobras.AdicionarTransacao(compra3);
+        petrobras.AdicionarTransacao(Compra4);
+        petrobras.AdicionarTransacao(venda1);
         Assert.That(petrobras.PrecoMedio.Valor, Is.EqualTo(101.90m));
     }
 }

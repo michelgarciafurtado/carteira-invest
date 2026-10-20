@@ -65,12 +65,20 @@ public class AcaoCarteira:BaseEntity
     public void AdicionarTransacao(AcaoTransacao transacao)
     {
         if (transacao == null)
-        {
             throw new ArgumentNullException(nameof(transacao), "A transação não pode ser nula.");
-        }
+
         _transacoes.Add(transacao);
 
-        PrecoMedio = CalcularPrecoMedio();
+        //catch esta vazio porque as validações estao no metodo CalcularPrecoMedio
+        try
+        {
+            PrecoMedio = CalcularPrecoMedio();
+        }catch
+        {
+            _transacoes.Remove(transacao);
+            throw ;
+        }
+        
         //RecalcularPosicao();
         //RecalcularValoresMercado();
     }
