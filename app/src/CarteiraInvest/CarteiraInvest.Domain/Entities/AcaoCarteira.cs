@@ -10,13 +10,13 @@ namespace CarteiraInvest.Domain.Entities;
 public class AcaoCarteira:BaseEntity
 {
     public string Symbol { get; private set; }
-    public Acao Acao { get; private set; }
+    public Acao? Acao { get; private set; }
     public DateTimeOffset? DataUltimaCotacao { get; private set; }
     public Money? PrecoUltimaCotacao { get; private set; }
     public Guid InvestidorId { get; private set; }
-    public Investidor Investidor { get; private set; }
+    public Investidor? Investidor { get; private set; }
     public Guid CorretoraId { get; private set; }
-    public Corretora Corretora { get; private set; }
+    public Corretora? Corretora { get; private set; }
     public Money PrecoMedio { get; private set; }
     public int Quantidade { get; private set; }
     public Money ValorInvestido { get; private set; }
@@ -38,7 +38,7 @@ public class AcaoCarteira:BaseEntity
         if (corretoraId == Guid.Empty)
             throw new ArgumentException("Corretora inválida.", nameof(corretoraId));
 
-        Symbol = symbol.Trim().ToUpper();
+        Symbol = symbol.Trim().ToUpperInvariant();
         InvestidorId = investidorId;
         CorretoraId = corretoraId;
     }
@@ -72,8 +72,9 @@ public class AcaoCarteira:BaseEntity
         //catch esta vazio porque as validações estao no metodo CalcularPrecoMedio
         try
         {
-            PrecoMedio = CalcularPrecoMedio();
-        }catch
+            RecalcularPosicao();
+        }
+        catch
         {
             _transacoes.Remove(transacao);
             throw ;
@@ -85,9 +86,36 @@ public class AcaoCarteira:BaseEntity
 
     public void RecalcularPosicao()
     {
-        PrecoMedio = CalcularPrecoMedio();
-        //Quantidade = CalcularQuantidade();
-        //ValorInvestido = CalcularValorInvestido();
+        decimal custoTotal = 0m;
+        int quantidadeTotal = 0;
+        decimal precoMedioAtual = 0m;
+        foreach (var transacao in _transacoes.OrderBy(t => t.DataOperacao))
+        {
+            if (transacao.TipoOperacao == TipoOperacaoEnum.Compra)
+            {
+                custoTotal += transacao.PrecoUnitario.Valor * transacao.Quantidade;
+                quantidadeTotal += transacao.Quantidade;
+            }
+            else if (transacao.TipoOperacao == TipoOperacaoEnum.Venda)
+            {
+                if (quantidadeTotal <= 0)
+                {
+                    throw new InvalidOperationException("Não é possível vender ações, pois não há ações disponíveis na carteira.");
+                }
+                if (transacao.Quantidade > quantidadeTotal)
+                {
+                    throw new InvalidOperationException("Não é possível vender mais ações do que a quantidade disponível na carteira.");
+                }
+                precoMedioAtual = custoTotal / quantidadeTotal;
+
+                quantidadeTotal -= transacao.Quantidade;
+
+                custoTotal = quantidadeTotal * precoMedioAtual;
+            }
+        }
+        Quantidade = quantidadeTotal;
+        PrecoMedio = Money.Criar(quantidadeTotal > 0 ? custoTotal / quantidadeTotal : 0m);
+        ValorInvestido = Money.Criar(custoTotal);
     }
 
     public void RecalcularValoresMercado()
@@ -121,9 +149,6 @@ public class AcaoCarteira:BaseEntity
                 decimal precoMedioAtual = custoTotal / quantidadeTotal;
 
                 quantidadeTotal -= transacao.Quantidade;
-
-                if(quantidadeTotal <= 0)
-                    return Money.Zero;
 
                 custoTotal = quantidadeTotal * precoMedioAtual;
             }
