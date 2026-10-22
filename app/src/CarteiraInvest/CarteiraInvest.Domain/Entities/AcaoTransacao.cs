@@ -14,7 +14,7 @@ public class AcaoTransacao: BaseEntity
     public Investidor? Investidor { get; private set; }
     public TipoOperacaoEnum TipoOperacao { get; private set; }
     public DateTime DataOperacao { get; private set; }
-    public decimal PrecoUnitario { get; private set; }
+    public Money PrecoUnitario { get; private set; }
     public int Quantidade { get; private set; }
 
     public AcaoTransacao (
@@ -33,14 +33,12 @@ public class AcaoTransacao: BaseEntity
             throw new ArgumentException("A quantidade da transação deve ser um valor positivo.", nameof(quantidade));
         if (precoUnitario <= 0)
             throw new ArgumentException("O preço deve ser maior que zero.");
-        if (quantidade <= 0)
-            throw new ArgumentException("A quantidade deve ser maior que zero.");
 
         AcaoSymbol = acaoSymbol.Trim().ToUpper();
         InvestidorId = investidorId;
         TipoOperacao = tipoOperacao;
         DataOperacao = dataOperacao;
-        PrecoUnitario = precoUnitario;
+        PrecoUnitario = Money.Criar(precoUnitario);
         Quantidade = quantidade;
     }
 }
