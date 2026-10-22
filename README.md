@@ -211,11 +211,4 @@ classDiagram
 - Os relacionamentos representam propriedades e coleções declaradas no código. Não pressupõem configuração de banco de dados, exclusão em cascata ou composição exclusiva. A interface `IEquatable<Money>` pertence ao .NET e aparece apenas para mostrar sua implementação.
 - Construtores e membros explicitamente declarados foram incluídos; membros gerados pelo compilador para o record e membros herdados de `object` não são repetidos.
 
-## Detalhes sobre a implementação
-
-- `Acao` não herda de `BaseEntity`; seu símbolo é referenciado por `Symbol` ou `AcaoSymbol` nas entidades.
-- As referências `AcaoTransacao.Acao` e `AcaoTransacao.Investidor` são anuláveis, embora o construtor exija um símbolo e um identificador de investidor válidos.
-- As propriedades de navegação não anuláveis de `AcaoCarteira` e `AcaoMonitorada` não são inicializadas por seus construtores. As multiplicidades seguem as declarações dos tipos, sem garantir que essas referências estejam preenchidas em execução.
-- `AcaoCarteira.Transacoes` é uma coleção local: `AcaoTransacao` não declara referência nem identificador de `AcaoCarteira` ou `Corretora`. O código também não impede que a mesma instância de transação seja adicionada a carteiras distintas.
-- `CalcularQuantidade`, `CalcularValorInvestido`, `CalcularValorAtual`, `CalcularLucroPrejuizo` e `CalcularPercentualLucroPrejuizo` lançam `NotImplementedException`. Os dois primeiros têm suas chamadas comentadas em `RecalcularPosicao`; os três últimos são chamados por `RecalcularValoresMercado`, inclusive durante `AtualizarCotacao`.
 
