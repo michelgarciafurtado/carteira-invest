@@ -8,9 +8,9 @@ namespace CarteiraInvest.Domain.Entities;
 public class AcaoMonitorada:BaseEntity
 {
     public string Symbol { get; private set; }
-    public Acao Acao { get; private set; }
+    public Acao? Acao { get; private set; }
     public Guid InvestidorId { get; private set; }
-    public Investidor Investidor { get; private set; }
+    public Investidor? Investidor { get; private set; }
     public decimal? PrecoAlvo { get; private set; }
     public bool EmitirAlerta { get; private set; }
 
@@ -25,7 +25,7 @@ public class AcaoMonitorada:BaseEntity
             throw new ArgumentException("O ID do investidor não pode ser vazio.", nameof(investidorId));
         }
         
-        Symbol = symbol;
+        Symbol = symbol.Trim().ToUpperInvariant();
         InvestidorId = investidorId;
         PrecoAlvo = precoAlvo;
         EmitirAlerta = emitirAlerta;
