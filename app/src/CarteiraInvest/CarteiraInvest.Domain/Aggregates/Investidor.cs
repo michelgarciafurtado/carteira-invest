@@ -68,12 +68,13 @@ public class Investidor:BaseEntity
 
     public void AdicionarAcaoCarteira(AcaoCarteira acaoCarteira)
     {
+       
         if (acaoCarteira.InvestidorId != this.Id)
             throw new InvalidOperationException("A ação da carteira não pertence a este investidor.");
 
         if (Carteira.Any(a => string.Equals(a.Symbol, acaoCarteira.Symbol) && a.CorretoraId == acaoCarteira.CorretoraId))
             throw new InvalidOperationException($"A ação {acaoCarteira.Symbol} já está na carteira do investidor para a corretora especificada.");
-
+       
         _carteira.Add(acaoCarteira);
     }
 
