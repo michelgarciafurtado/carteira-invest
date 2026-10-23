@@ -73,6 +73,7 @@ public class AcaoCarteira:BaseEntity
         try
         {
             RecalcularPosicao();
+            RecalcularValoresMercado();
         }
         catch
         {
@@ -80,8 +81,7 @@ public class AcaoCarteira:BaseEntity
             throw ;
         }
         
-        //RecalcularPosicao();
-        //RecalcularValoresMercado();
+        
     }
 
     public void RecalcularPosicao()
@@ -125,60 +125,28 @@ public class AcaoCarteira:BaseEntity
         PercentualLucroPrejuizo = CalcularPercentualLucroPrejuizo();
     }
 
-    private Money CalcularPrecoMedio()
-    {
-        decimal custoTotal = 0;
-        int quantidadeTotal = 0;
-        foreach (var transacao in _transacoes.OrderBy(t => t.DataOperacao))
-        {
-            if (transacao.TipoOperacao == TipoOperacaoEnum.Compra)
-            {
-                custoTotal += transacao.PrecoUnitario.Valor * transacao.Quantidade;
-                quantidadeTotal += transacao.Quantidade;
-            }
-            else if (transacao.TipoOperacao == TipoOperacaoEnum.Venda)
-            {
-                if(quantidadeTotal <= 0)
-                {
-                    throw new InvalidOperationException("Não é possível vender ações, pois não há ações disponíveis na carteira.");
-                }
-                if (transacao.Quantidade > quantidadeTotal)
-                {
-                    throw new InvalidOperationException("Não é possível vender mais ações do que a quantidade disponível na carteira.");
-                }
-                decimal precoMedioAtual = custoTotal / quantidadeTotal;
-
-                quantidadeTotal -= transacao.Quantidade;
-
-                custoTotal = quantidadeTotal * precoMedioAtual;
-            }
-        }
-        return Money.Criar(quantidadeTotal > 0 ? custoTotal / quantidadeTotal : 0);
-    }
-
-    private int CalcularQuantidade()
-    {
-        throw new NotImplementedException();
-    }
-
-    private Money CalcularValorInvestido()
-    {
-        throw new NotImplementedException();
-    }
-    
     //calculos que dependem do preço atual da ação
+
+    //calcula o valor atual da ação na carteira, multiplicando a quantidade de ações pelo preço da última cotação
     private Money CalcularValorAtual()
     {
-        throw new NotImplementedException();
+        var preco = PrecoUltimaCotacao?.Valor ?? 0m;
+        return Money.Criar(Quantidade * preco);
     }
 
     private Money CalcularLucroPrejuizo()
     {
-        throw new NotImplementedException();
+        if(ValorInvestido.Valor == 0 || ValorAtual.Valor == 0 || PrecoUltimaCotacao == null)
+            return Money.Criar(0);
+
+        return ValorAtual - ValorInvestido;
     }
 
     private decimal CalcularPercentualLucroPrejuizo()
     {
-        throw new NotImplementedException();
+        if (ValorInvestido.Valor == 0)
+            return 0;
+
+        return (LucroPrejuizo.Valor / ValorInvestido.Valor) * 100;
     }
 }
