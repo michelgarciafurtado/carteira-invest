@@ -8,13 +8,15 @@ Contara com cache Redis, PostgreSQL para armazenar informacoes das carteiras e I
 
 ## Acompanhanmento do trabalho 
 
-[ ] - Modelagem de Domain
-[ ] - Criacao de testes unitários
-[ ] - Criação dos Endpoints
-[ ] - Integracao com API da Brapi
-[ ] - Persistência dos dados 
-[ ] - Criação do cache Redis
-[ ] - Implementação dos UseCase
+- [X] - Modelagem de Domain
+- [X] - Criacao de testes unitários
+- [ ] - Planejamento dos Endpoints (Miro)
+- [ ] - Criação dos Endpoints
+- [ ] - Definição dos DTO de integracao e Domain 
+- [ ] - Integracao com API da Brapi
+- [ ] - Persistência dos dados 
+- [ ] - Criação do cache Redis
+- [ ] - Implementação dos UseCase
 
 ## 🛠️ Tecnologias Utilizadas
 
