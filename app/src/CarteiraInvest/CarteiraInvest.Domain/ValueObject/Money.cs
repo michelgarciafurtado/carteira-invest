@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CarteiraInvest.Domain.ValueObject;
+﻿namespace CarteiraInvest.Domain.ValueObject;
 
 public readonly struct Money:IEquatable<Money>
 {
@@ -10,11 +6,7 @@ public readonly struct Money:IEquatable<Money>
 
     public Money(decimal valor)
     {
-        if(valor == null)
-            throw new ArgumentNullException(nameof(valor), "O valor não pode ser nulo.");
-
-        //este MidpointRounding.AwayFromZero é aconselhavel para aplicacoes financeiras porque arredonda para o valor mais distante de zero, evitando viés em cálculos financeiros
-        Valor = Math.Round(valor, 2, MidpointRounding.AwayFromZero);
+      Valor = valor;
     }
     //para instanciar um Money com valor zero
     public static Money Zero => new(0m);
@@ -29,7 +21,7 @@ public readonly struct Money:IEquatable<Money>
         => divisor == 0 ? Zero : new(a.Valor / divisor);
 
     public static implicit operator decimal(Money money) => money.Valor;
-
+    //devolve o valor do Money como string formatada em moeda com duas casas decimais
     public override string ToString() => Valor.ToString("C2");
 
     // Implementação de IEquatable<Money>
