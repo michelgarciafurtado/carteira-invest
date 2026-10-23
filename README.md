@@ -3,7 +3,21 @@
 Sistema fullstack de gerenciamento e acompanhamento de carteira de investimentos.
 O projeto contará com uma API para atender o front feito em Angular e fará integração com API da Brapi para consultar 
 os symbols(código da ação), nome dado aos códigos das ações pela API externa.
-Contara com cache Redis, PostgreSQL para armazenar informacoes das carteiras e IdentityDB para servir de base de dados para armazenar os dados de usuários.
+Contara com cache Redis, PostgreSQL para armazenar informacoes das carteiras e IdentityDB para servir de base de dados para armazenar os dados de usuários.  
+
+## Requisitos Funcionais
+
+- Cadastrar de investidor;
+- Lançar operações de compra e venda de ativos em carteira
+- Realizar o Calculo, á partir da compra/venda de ações das seguintes variáveis: 
+  - Preço médio;
+  - Valor Investido,
+  - Valor Atual (Qtd ações x Ultima Cotação);
+  - Lucro / Prejuizo estimado em valores e porcentagem;
+  - Quantidade de ações em carteira; 
+- Cadastrar ações para serem monitoradas;
+- Emitir alerta de preço-alvo
+
 [Link para documentação no miro:](https://miro.com/app/board/uXjVEYtcPi0=/?share_link_id=678945879539)
 
 ## Acompanhanmento do trabalho 
