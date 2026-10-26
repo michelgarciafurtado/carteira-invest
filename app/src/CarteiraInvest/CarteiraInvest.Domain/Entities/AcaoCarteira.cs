@@ -62,10 +62,25 @@ public class AcaoCarteira:BaseEntity
         RecalcularValoresMercado();
     }
 
-    public void AdicionarTransacao(AcaoTransacao transacao)
+    public void AdicionarTransacao(TipoOperacaoEnum tipoOperacao,
+                DateTime dataOperacao,
+                decimal precoUnitario,
+                int quantidade)
     {
-        if (transacao == null)
-            throw new ArgumentNullException(nameof(transacao), "A transação não pode ser nula.");
+     AcaoTransacao transacao = new AcaoTransacao(
+            Symbol,
+            InvestidorId,
+            tipoOperacao,
+            dataOperacao,
+            precoUnitario,
+            quantidade);
+
+        if(transacao.PrecoUnitario.Valor <= 0)
+            throw new ArgumentException("Preço unitário da transação deve ser maior que zero.", nameof(precoUnitario));
+        if(transacao.Quantidade <= 0)
+            throw new ArgumentException("Quantidade da transação deve ser maior que zero.", nameof(quantidade));
+        if(transacao.DataOperacao > DateTime.UtcNow)
+            throw new ArgumentException("Data da transação não pode ser no futuro.", nameof(dataOperacao));
 
         _transacoes.Add(transacao);
 
@@ -79,9 +94,7 @@ public class AcaoCarteira:BaseEntity
         {
             _transacoes.Remove(transacao);
             throw ;
-        }
-        
-        
+        } 
     }
 
     public void RecalcularPosicao()

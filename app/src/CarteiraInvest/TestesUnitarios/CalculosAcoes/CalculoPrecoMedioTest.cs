@@ -1,73 +1,161 @@
-﻿using CarteiraInvest.Domain.Entities;
+﻿using System;
+using CarteiraInvest.Domain.Entities;
 using CarteiraInvest.Domain.ValueObject;
+using NUnit.Framework;
 
 namespace TestesUnitarios.CalculosAcoes;
 
 public class CalculoPrecoMedioTest
 {
-    AcaoCarteira petrobras;
-    AcaoTransacao compra1;
-    AcaoTransacao compra2;
-    AcaoTransacao compra3;
-    AcaoTransacao venda1;
-    AcaoTransacao Compra4;
-    Guid investidorId = Guid.NewGuid();
-    Guid corretoraId = Guid.NewGuid();
+    private AcaoCarteira petrobras = null!;
+    private DateTime dataReferencia;
+
     [SetUp]
     public void Setup()
     {
-        petrobras = new AcaoCarteira("PETR4", investidorId, corretoraId);
-        compra1 = new AcaoTransacao("PETR4", investidorId, TipoOperacaoEnum.Compra, DateTime.Now.AddDays(-10), 100.0m, 10);
-        compra2 = new AcaoTransacao("PETR4", investidorId, TipoOperacaoEnum.Compra, DateTime.Now.AddDays(-5), 120.0m, 15);
-        compra3 = new AcaoTransacao("PETR4", investidorId, TipoOperacaoEnum.Compra, DateTime.Now.AddDays(-2), 80.0m, 20);
-        venda1 = new AcaoTransacao("PETR4", investidorId, TipoOperacaoEnum.Venda, DateTime.Now, 115.0m, 30);
-        Compra4 = new AcaoTransacao("PETR4", investidorId, TipoOperacaoEnum.Compra, DateTime.Now.AddDays(1), 105.0m, 20);
+        petrobras = new AcaoCarteira(
+            "PETR4",
+            Guid.NewGuid(),
+            Guid.NewGuid());
+
+        dataReferencia = DateTime.UtcNow.AddDays(-2);
     }
 
     [Test]
-    public void CalcularPrecoMedio_DevePassar()
+    public void CalcularPrecoMedio_AposComprasVendaENovaCompra_DeveRetornarValorEsperado()
     {
-        petrobras.AdicionarTransacao(compra1);
-        petrobras.AdicionarTransacao(compra2);
-        petrobras.AdicionarTransacao(compra3);
-        petrobras.AdicionarTransacao(venda1);
-        petrobras.AdicionarTransacao(Compra4);
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-10),
+            100m,
+            10);
 
-        Assert.That(Math.Round(petrobras.PrecoMedio.Valor, 2), Is.EqualTo(101.90m));
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-5),
+            120m,
+            15);
+
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-2),
+            80m,
+            20);
+
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Venda,
+            dataReferencia,
+            115m,
+            30);
+
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(1),
+            105m,
+            20);
+
+        Assert.That(
+            Math.Round(petrobras.PrecoMedio.Valor, 2),
+            Is.EqualTo(101.90m));
     }
 
     [Test]
     public void CalcularPrecoMedio_SemTransacoes_DeveSerZero()
     {
-        Assert.That(petrobras.PrecoMedio.Valor, Is.EqualTo(0.0m));
+        Assert.That(petrobras.PrecoMedio.Valor, Is.EqualTo(0m));
     }
 
     [Test]
-    public void VendaMaiorQueQuantidade_DeveLancarExcecao()
+    public void VendaMaiorQueQuantidade_DeveLancarExcecaoEPreservarPosicao()
     {
-        petrobras.AdicionarTransacao(compra1);
-        petrobras.AdicionarTransacao(compra2);
-        var vendaInvalida = new AcaoTransacao("PETR4", investidorId, TipoOperacaoEnum.Venda, DateTime.Now, 110.0m, 30);
-        Assert.Throws<InvalidOperationException>(() => petrobras.AdicionarTransacao(vendaInvalida));
-        Assert.That(petrobras.Transacoes.Count, Is.EqualTo(2));//confirma que a venda inválida não foi adicionada
-    }
-    [Test]
-    public void CompraLancadaForaDeOrdemCronologica_DevePassar()
-    {
-        petrobras.AdicionarTransacao(compra3);
-        petrobras.AdicionarTransacao(compra2);
-        petrobras.AdicionarTransacao(compra1);
-        Assert.That(Math.Round(petrobras.PrecoMedio.Valor, 2), Is.EqualTo(97.78m));
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-10),
+            100m,
+            10);
+
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-5),
+            120m,
+            15);
+
+        Assert.Throws<InvalidOperationException>(() =>
+            petrobras.AdicionarTransacao(
+                TipoOperacaoEnum.Venda,
+                dataReferencia,
+                110m,
+                30));
+
+        // A venda rejeitada não deve alterar a posição.
+        Assert.That(petrobras.Transacoes.Count, Is.EqualTo(2));
+        Assert.That(petrobras.Quantidade, Is.EqualTo(25));
+        Assert.That(petrobras.ValorInvestido.Valor, Is.EqualTo(2800m));
+        Assert.That(petrobras.PrecoMedio.Valor, Is.EqualTo(112m));
     }
 
     [Test]
-    public void VendaLancadaForaDeOrdemCronologica_DevePassar()
+    public void CompraLancadaForaDeOrdemCronologica_DeveCalcularPrecoMedioCorretamente()
     {
-        petrobras.AdicionarTransacao(compra1);
-        petrobras.AdicionarTransacao(compra2);
-        petrobras.AdicionarTransacao(compra3);
-        petrobras.AdicionarTransacao(Compra4);
-        petrobras.AdicionarTransacao(venda1);
-        Assert.That(Math.Round(petrobras.PrecoMedio.Valor, 2), Is.EqualTo(101.9m));
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-2),
+            80m,
+            20);
+
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-5),
+            120m,
+            15);
+
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-10),
+            100m,
+            10);
+
+        Assert.That(
+            Math.Round(petrobras.PrecoMedio.Valor, 2),
+            Is.EqualTo(97.78m));
+    }
+
+    [Test]
+    public void VendaLancadaForaDeOrdemCronologica_DeveCalcularPrecoMedioCorretamente()
+    {
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-10),
+            100m,
+            10);
+
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-5),
+            120m,
+            15);
+
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-2),
+            80m,
+            20);
+
+        // Registrada antes da venda, mas ocorreu depois dela.
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(1),
+            105m,
+            20);
+
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Venda,
+            dataReferencia,
+            115m,
+            30);
+
+        Assert.That(
+            Math.Round(petrobras.PrecoMedio.Valor, 2),
+            Is.EqualTo(101.90m));
     }
 }

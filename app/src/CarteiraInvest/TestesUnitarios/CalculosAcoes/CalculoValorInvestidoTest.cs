@@ -9,29 +9,26 @@ namespace TestesUnitarios.CalculosAcoes;
 public class CalculoValorInvestidoTest
 {
     private AcaoCarteira _carteira = null!;
-    private Guid _investidorId;
-    private readonly DateTime _dataBase = new(2026, 10, 1);
+    private DateTime _dataBase;
 
     [SetUp]
     public void Setup()
     {
-        _investidorId = Guid.NewGuid();
+        _dataBase = DateTime.UtcNow.AddDays(-10);
 
         _carteira = new AcaoCarteira(
             "PETR4",
-            _investidorId,
+            Guid.NewGuid(),
             Guid.NewGuid());
     }
 
-    private AcaoTransacao CriarTransacao(
+    private void AdicionarTransacao(
         TipoOperacaoEnum tipo,
         decimal preco,
         int quantidade,
         int dias)
     {
-        return new AcaoTransacao(
-            "PETR4",
-            _investidorId,
+        _carteira.AdicionarTransacao(
             tipo,
             _dataBase.AddDays(dias),
             preco,
@@ -41,8 +38,6 @@ public class CalculoValorInvestidoTest
     [Test]
     public void SemTransacoes_ValorInvestidoDeveSerZero()
     {
-        _carteira.RecalcularPosicao();
-
         Assert.That(
             _carteira.ValorInvestido.Valor,
             Is.EqualTo(0m));
@@ -51,8 +46,7 @@ public class CalculoValorInvestidoTest
     [Test]
     public void Compra_DeveMultiplicarPrecoPelaQuantidade()
     {
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0));
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0);
 
         Assert.That(
             _carteira.ValorInvestido.Valor,
@@ -62,14 +56,9 @@ public class CalculoValorInvestidoTest
     [Test]
     public void Compras_DevemSomarCustos()
     {
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0));
-
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 120m, 15, 1));
-
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 80m, 20, 2));
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0);
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 120m, 15, 1);
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 80m, 20, 2);
 
         Assert.That(
             _carteira.ValorInvestido.Valor,
@@ -81,19 +70,13 @@ public class CalculoValorInvestidoTest
     public void VendaParcial_DeveReduzirCustoPeloPrecoMedio(
         int precoVenda)
     {
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0));
-
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 120m, 10, 1));
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0);
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 120m, 10, 1);
 
         // Custo: 2.200; quantidade: 20; preço médio: 110.
-        _carteira.AdicionarTransacao(
-            CriarTransacao(
-                TipoOperacaoEnum.Venda, precoVenda, 5, 2));
+        AdicionarTransacao(TipoOperacaoEnum.Venda, precoVenda, 5, 2);
 
-        // Restam 15 ações com custo médio de 110.
-        // O preço de venda não altera esse custo.
+        // Restam 15 ações a 110, independentemente do preço de venda.
         Assert.That(
             _carteira.ValorInvestido.Valor,
             Is.EqualTo(1650m));
@@ -102,11 +85,8 @@ public class CalculoValorInvestidoTest
     [Test]
     public void VendaTotal_DeveZerarValorInvestido()
     {
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0));
-
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Venda, 150m, 10, 1));
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0);
+        AdicionarTransacao(TipoOperacaoEnum.Venda, 150m, 10, 1);
 
         Assert.That(
             _carteira.ValorInvestido.Valor,
@@ -116,14 +96,9 @@ public class CalculoValorInvestidoTest
     [Test]
     public void CompraAposVendaTotal_DeveConsiderarSomenteNovoCusto()
     {
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0));
-
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Venda, 150m, 10, 1));
-
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 80m, 7, 2));
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0);
+        AdicionarTransacao(TipoOperacaoEnum.Venda, 150m, 10, 1);
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 80m, 7, 2);
 
         Assert.That(
             _carteira.ValorInvestido.Valor,
@@ -133,17 +108,13 @@ public class CalculoValorInvestidoTest
     [Test]
     public void VendaInseridaForaDeOrdem_DeveConsiderarDataDaOperacao()
     {
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0));
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0);
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 200m, 10, 2);
 
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 200m, 10, 2));
+        // Inserida por último, mas realizada entre as compras.
+        AdicionarTransacao(TipoOperacaoEnum.Venda, 150m, 5, 1);
 
-        // Cronologicamente, a venda acontece antes da segunda compra.
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Venda, 150m, 5, 1));
-
-        // Primeira compra após venda: 5 × 100 = 500.
+        // Após a venda: 5 × 100 = 500.
         // Segunda compra: 10 × 200 = 2.000.
         Assert.That(
             _carteira.ValorInvestido.Valor,
@@ -153,34 +124,25 @@ public class CalculoValorInvestidoTest
     [Test]
     public void VendaComPrecoMedioPeriodico_DevePreservarPrecisao()
     {
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 10m, 1, 0));
-
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 15m, 2, 1));
-
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Venda, 20m, 1, 2));
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 10m, 1, 0);
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 15m, 2, 1);
+        AdicionarTransacao(TipoOperacaoEnum.Venda, 20m, 1, 2);
 
         // Custo inicial: 40; quantidade inicial: 3.
         // Após vender uma ação, restam 2/3 do custo.
         Assert.That(
             _carteira.ValorInvestido.Valor,
             Is.EqualTo(26.6666666666667m)
-              .Within(0.000000000001m));
+                .Within(0.000000000001m));
     }
 
     [Test]
     public void VendaInvalida_DevePreservarValorInvestido()
     {
-        _carteira.AdicionarTransacao(
-            CriarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0));
+        AdicionarTransacao(TipoOperacaoEnum.Compra, 100m, 10, 0);
 
-        var vendaInvalida =
-            CriarTransacao(TipoOperacaoEnum.Venda, 150m, 11, 1);
-
-        Assert.Throws<InvalidOperationException>(
-            () => _carteira.AdicionarTransacao(vendaInvalida));
+        Assert.Throws<InvalidOperationException>(() =>
+            AdicionarTransacao(TipoOperacaoEnum.Venda, 150m, 11, 1));
 
         Assert.That(
             _carteira.ValorInvestido.Valor,

@@ -7,32 +7,27 @@ namespace TestesUnitarios;
 
 public class CalcularLucroPrejuizoTest
 {
-    AcaoCarteira petrobras;
-    AcaoTransacao compra1;
-    AcaoTransacao compra2;
-    AcaoTransacao compra3;
-    AcaoTransacao venda1;
-    AcaoTransacao Compra4;
-    Guid investidorId = Guid.NewGuid();
-    Guid corretoraId = Guid.NewGuid();
-    decimal PrecoAtual = 59.53m;
+    private AcaoCarteira petrobras = null!;
+    private DateTime dataReferencia;
 
     [SetUp]
     public void Setup()
     {
-        petrobras = new AcaoCarteira("PETR4", investidorId, corretoraId);
-        compra1 = new AcaoTransacao("PETR4", investidorId, TipoOperacaoEnum.Compra, DateTime.Now.AddDays(-10), 57.83m, 10);
-        compra2 = new AcaoTransacao("PETR4", investidorId, TipoOperacaoEnum.Compra, DateTime.Now.AddDays(-5), 57.36m, 15);
-        compra3 = new AcaoTransacao("PETR4", investidorId, TipoOperacaoEnum.Compra, DateTime.Now.AddDays(-2), 58.01m, 20);
-        venda1 = new AcaoTransacao("PETR4", investidorId, TipoOperacaoEnum.Venda, DateTime.Now, 59.42m, 30);
-        Compra4 = new AcaoTransacao("PETR4", investidorId, TipoOperacaoEnum.Compra, DateTime.Now.AddDays(1), 59.61m, 20);
+        petrobras = new AcaoCarteira(
+            "PETR4",
+            Guid.NewGuid(),
+            Guid.NewGuid());
+
+        dataReferencia = DateTime.UtcNow.AddDays(-1);
     }
 
     [Test]
-    public void DeveRetornarLucroPrejuizoZero_QuandoNaoHouverValorInvestidoOuValorAtual()
+    public void DeveRetornarLucroPrejuizoZero_QuandoNaoHouverTransacoes()
     {
-        petrobras.AtualizarCotacao(DateTimeOffset.UtcNow, PrecoAtual);
+        // Act
+        petrobras.AtualizarCotacao(DateTimeOffset.UtcNow, 59.53m);
 
+        // Assert
         Assert.That(petrobras.LucroPrejuizo.Valor, Is.EqualTo(0m));
     }
 
@@ -40,30 +35,62 @@ public class CalcularLucroPrejuizoTest
     public void DeveCalcularLucroCorretamente_QuandoValorAtualForMaiorQueValorInvestido()
     {
         // Arrange
-        petrobras.AdicionarTransacao(compra1);
-        petrobras.AdicionarTransacao(compra2);
-        petrobras.AdicionarTransacao(compra3);
-        petrobras.AdicionarTransacao(venda1); // Sobram 15 ações a Preço Médio R$ 57.754
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-10),
+            57.83m,
+            10);
+
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-5),
+            57.36m,
+            15);
+
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia.AddDays(-2),
+            58.01m,
+            20);
+
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Venda,
+            dataReferencia,
+            59.42m,
+            30);
 
         // Act
-        petrobras.AtualizarCotacao(DateTimeOffset.UtcNow, PrecoAtual); // 59.53
+        petrobras.AtualizarCotacao(DateTimeOffset.UtcNow, 59.53m);
 
-        // Assert: ValorAtual - ValorInvestido
-        decimal lucroEsperado = petrobras.ValorAtual.Valor - petrobras.ValorInvestido.Valor;
-        Assert.That(petrobras.LucroPrejuizo.Valor, Is.EqualTo(lucroEsperado));
+        // Assert
+        // Compras: R$ 2.598,90 para 45 ações.
+        // Após vender 30: restam 15 ações com custo de R$ 866,30.
+        // Valor atual: 15 × R$ 59,53 = R$ 892,95.
+        // Lucro não realizado: R$ 892,95 − R$ 866,30 = R$ 26,65.
+        Assert.That(
+            petrobras.LucroPrejuizo.Valor,
+            Is.EqualTo(26.65m).Within(0.000001m));
     }
 
     [Test]
     public void DeveCalcularPrejuizoCorretamente_QuandoPrecoAtualForMenorQuePrecoMedio()
     {
         // Arrange
-        petrobras.AdicionarTransacao(compra1);
-        decimal precoComPrejuizo = 50.00m;
+        petrobras.AdicionarTransacao(
+            TipoOperacaoEnum.Compra,
+            dataReferencia,
+            57.83m,
+            10);
 
         // Act
-        petrobras.AtualizarCotacao(DateTimeOffset.UtcNow, precoComPrejuizo);
+        petrobras.AtualizarCotacao(DateTimeOffset.UtcNow, 50.00m);
 
-        // Assert: (10 * 50.00) - (10 * 57.83) = 500 - 578.30 = -78.30
-        Assert.That(petrobras.LucroPrejuizo.Valor, Is.EqualTo(-78.30m));
+        // Assert
+        // Valor atual: R$ 500,00.
+        // Valor investido: R$ 578,30.
+        // Prejuízo: −R$ 78,30.
+        Assert.That(
+            petrobras.LucroPrejuizo.Valor,
+            Is.EqualTo(-78.30m));
     }
 }
