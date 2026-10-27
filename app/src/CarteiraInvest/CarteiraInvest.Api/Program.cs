@@ -1,3 +1,4 @@
+using CarteiraInvest.Application.Interfaces.Identidade;
 using CarteiraInvest.Infra.DataBaseContext;
 using CarteiraInvest.Infra.Identidade;
 using Microsoft.AspNetCore.Identity;
@@ -22,6 +23,8 @@ builder.Services
     })
     .AddEntityFrameworkStores<DbContextApplication>()
     .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<IServicoIdentidade, ServicoIdentidade>();
 
 builder.Services.AddControllers();
 builder.Services.AddAuthorization();
