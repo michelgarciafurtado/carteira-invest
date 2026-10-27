@@ -22,9 +22,9 @@ Contara com cache Redis, PostgreSQL para armazenar informacoes das carteiras e I
 
 ## Acompanhanmento do trabalho 
 
-- [X] - Modelagem de Domain
-- [X] - Criacao de testes unitários
-- [ ] - Implementar IdentityDb
+- [X] - `PRONTO` Modelagem de Domain
+- [X] - `PRONTO` Criacao de testes unitários
+- [/] - `DOING` Implementar IdentityDb
 - [ ] - Implementar Login e autenticação JWT
 - [ ] - Planejamento dos Endpoints (Miro)
 - [ ] - Criação dos Endpoints
