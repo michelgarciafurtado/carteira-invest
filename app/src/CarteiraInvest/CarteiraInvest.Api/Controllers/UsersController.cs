@@ -24,6 +24,24 @@ public class UsersController : ControllerBase
     }
 
     [HttpPost]
+    public async Task<IActionResult> CriarinvestidorAsync([FromBody] CriarInvestidorDto dto)
+    {
+        var resultado = await _servicoIdentidade.CriarUsuarioAsync(dto.Email, dto.Senha);
+
+        if (!resultado.Sucesso)
+            return BadRequest(new
+            {
+                Mensagem = "Não foi possivel criar o usuário",
+                Erros = resultado.Erros
+            });
+        return StatusCode(StatusCodes.Status201Created, new
+        {
+            Mensagem = "Usuario criado com sucesso",
+            UsuarioId = resultado.UsuarioId
+        });
+    }
+
+    [HttpPost]
     public async Task<IActionResult> CriarUsuarioAsync([FromBody] CriarUsuarioDto dto)
     {
         var resultado = await _servicoIdentidade.CriarUsuarioAsync(dto.Email, dto.Senha);
