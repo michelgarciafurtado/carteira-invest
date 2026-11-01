@@ -1,6 +1,28 @@
+using CarteiraInvest.Infra.DataBaseContext;
+using CarteiraInvest.Infra.Identidade;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ??
+                       throw new InvalidOperationException("Connection string 'DefaultConnection' nao configurada");
+
+//Registra os serviços de proteção dos dados dos tokens do Identity
+builder.Services.AddDataProtection();
+
+builder.Services.AddDbContext<DbContextApplication>(options =>
+options.UseSqlite(connectionString));
+
+builder.Services
+    .AddIdentityCore<ApplicationUser>(options =>
+    {
+        options.User.RequireUniqueEmail = true;
+    })
+    .AddEntityFrameworkStores<DbContextApplication>()
+    .AddDefaultTokenProviders();
+
 builder.Services.AddControllers();
 builder.Services.AddAuthorization();
 builder.Services.AddHealthChecks();
