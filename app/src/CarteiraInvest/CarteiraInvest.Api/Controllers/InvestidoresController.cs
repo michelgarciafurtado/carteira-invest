@@ -5,7 +5,7 @@ namespace CarteiraInvest.Api.Controllers;
 
 [Route("carteirainvest/api/[controller]")]
 [ApiController]
-public class UsersController : ControllerBase
+public class InvestidoresController : ControllerBase
 {
 
     [HttpGet]
