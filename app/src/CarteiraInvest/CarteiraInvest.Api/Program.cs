@@ -1,6 +1,10 @@
 using CarteiraInvest.Application.Interfaces.Identidade;
+using CarteiraInvest.Application.Interfaces.Interfaces;
+using CarteiraInvest.Application.UseCases.InvestidorUseCase;
+using CarteiraInvest.Domain.Interfaces;
 using CarteiraInvest.Infra.DataBaseContext;
 using CarteiraInvest.Infra.Identidade;
+using CarteiraInvest.Infra.Repositorios;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
@@ -25,6 +29,8 @@ builder.Services
     .AddDefaultTokenProviders();
 
 builder.Services.AddScoped<IServicoIdentidade, ServicoIdentidade>();
+builder.Services.AddScoped<IInvestidorRepository, InvestidorRepository>();
+builder.Services.AddScoped<IInvestidorUseCase, CriarInvestidorUseCase>();
 
 builder.Services.AddControllers();
 builder.Services.AddAuthorization();

@@ -17,6 +17,34 @@ namespace CarteiraInvest.Infra.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
+            modelBuilder.Entity("CarteiraInvest.Domain.Aggregates.Investidor", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("IdentityUserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Sobrenome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Investidores", (string)null);
+                });
+
             modelBuilder.Entity("CarteiraInvest.Infra.Identidade.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -207,6 +235,54 @@ namespace CarteiraInvest.Infra.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("CarteiraInvest.Domain.Aggregates.Investidor", b =>
+                {
+                    b.OwnsOne("CarteiraInvest.Domain.ValueObject.Endereco", "Endereco", b1 =>
+                        {
+                            b1.Property<Guid>("InvestidorId")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("CEP")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("CEP");
+
+                            b1.Property<string>("Cidade")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("Cidade");
+
+                            b1.Property<string>("Complemento")
+                                .HasColumnType("TEXT")
+                                .HasColumnName("Complemento");
+
+                            b1.Property<string>("Estado")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("Estado");
+
+                            b1.Property<string>("Logradouro")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("Logradouro");
+
+                            b1.Property<string>("Numero")
+                                .IsRequired()
+                                .HasColumnType("TEXT")
+                                .HasColumnName("Numero");
+
+                            b1.HasKey("InvestidorId");
+
+                            b1.ToTable("Investidores");
+
+                            b1.WithOwner()
+                                .HasForeignKey("InvestidorId");
+                        });
+
+                    b.Navigation("Endereco")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
