@@ -29,7 +29,7 @@ public sealed class ServicoEmailGmail(IOptions<ConfiguracaoEmail> options) : ISe
 
         await cliente.AuthenticateAsync(
             _configuracao.EmailRemetente,
-            _configuracao.Senha,
+            _configuracao.SenhaApp,
             cancellationToken);
 
         await cliente.SendAsync(email, cancellationToken);

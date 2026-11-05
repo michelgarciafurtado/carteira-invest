@@ -10,6 +10,8 @@ using CarteiraInvest.Infra.Repositorios;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
+using CarteiraInvest.Infra.Servicos.Email;
+using CarteiraInvest.Application.Interfaces.Servicos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,11 +42,16 @@ builder.Services.AddAuthorization();
 builder.Services.AddHealthChecks();
 
 builder.Services.AddOptions<ConfiguracaoEmail>()
-    .Bind(builder.Configuration.GetSection("Email"))
-    .Validate(configuracao => 
-    !string.IsNullOrEmpty(configuracao.EmailRemetente) &&
-    !string.IsNullOrEmpty(configuracao.Senha),
-    "Configuracao de email invalida");
+    .Bind(builder.Configuration.GetSection("Email"));
+
+builder.Services.AddScoped<IServicoEmail, ServicoEmailGmail>();
+
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(2);
+});
+
+
 
 builder.Services.AddSwaggerGen(options =>
 {
