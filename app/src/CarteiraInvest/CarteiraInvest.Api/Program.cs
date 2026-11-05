@@ -23,8 +23,9 @@ options.UseSqlite(connectionString));
 builder.Services
     .AddIdentityCore<ApplicationUser>(options =>
     {
-        options.User.RequireUniqueEmail = true;
+        options.User.RequireUniqueEmail = true;//nao permite que dois usuarios tenham o mesmo email
     })
+    .AddRoles<IdentityRole>()//Habilita os perfis de usuarios
     .AddEntityFrameworkStores<DbContextApplication>()
     .AddDefaultTokenProviders();
 
@@ -52,6 +53,12 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    await InicializadorPerfis.InicializarAsync(roleManager);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

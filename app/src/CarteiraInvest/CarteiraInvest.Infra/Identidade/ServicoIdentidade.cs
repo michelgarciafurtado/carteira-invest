@@ -1,4 +1,5 @@
 ﻿using CarteiraInvest.Application.Interfaces.Identidade;
+using CarteiraInvest.Application.Seguranca;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,17 @@ public class ServicoIdentidade : IServicoIdentidade
             {
                 Sucesso = false,
                 Erros = resultado.Errors.Select(erro => erro.Description).ToArray()
+            };
+        }
+
+        var perfil = await _userManager.AddToRoleAsync(usuario, PerfisUsuarios.Investidor);
+
+        if(!perfil.Succeeded)
+        {
+            return new ResultadoCriacaoUsuario
+            {
+                Sucesso = false,
+                Erros = perfil.Errors.Select(erro => erro.Description).ToArray()
             };
         }
 
