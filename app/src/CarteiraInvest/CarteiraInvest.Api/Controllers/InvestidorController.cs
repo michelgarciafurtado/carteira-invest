@@ -31,5 +31,18 @@ public class InvestidorController(IInvestidorUseCase criarInvestidorUseCase) : C
             UsuarioId = resultado.IdendityUser
         });
     }
+    [HttpPost("confirmar-cadastro")]
+    public async Task<IActionResult> ConfirmarCadastroAsync([FromBody] ConfirmaCadastroDto dto)
+    {
+        var resultado = await _criarInvestidorUseCase.ConfirmarCadastroAsync(dto.UsuarioId, dto.Codigo);
+        if (resultado)
+        {
+            return Ok(new { Mensagem = "Cadastro confirmado com sucesso" });
+        }
+        else
+        {
+            return BadRequest(new { Mensagem = "Falha ao confirmar cadastro" });
+        }
+    }
 
 }

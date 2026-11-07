@@ -1,7 +1,5 @@
 using CarteiraInvest.Application.Interfaces.Identidade;
 using CarteiraInvest.Application.Interfaces.Interfaces;
-using CarteiraInvest.Application.Servicos.Email;
-using Microsoft.Extensions.DependencyInjection;
 using CarteiraInvest.Application.UseCases.InvestidorUseCase;
 using CarteiraInvest.Domain.Interfaces;
 using CarteiraInvest.Infra.DataBaseContext;

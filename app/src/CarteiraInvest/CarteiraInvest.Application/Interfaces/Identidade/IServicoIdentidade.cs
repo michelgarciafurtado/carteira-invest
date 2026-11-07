@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CarteiraInvest.Application.Dto;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -12,4 +13,6 @@ public interface IServicoIdentidade
     Task<bool> ConfirmarCadastroAsync(
     string usuarioId,
     string codigo);
+
+    Task<UsuarioLogadoDto> AutenticarUsuario(string email, string senha);
 }

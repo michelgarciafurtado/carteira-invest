@@ -1,4 +1,5 @@
-﻿using CarteiraInvest.Application.Interfaces.Identidade;
+﻿using CarteiraInvest.Application.Dto;
+using CarteiraInvest.Application.Interfaces.Identidade;
 using CarteiraInvest.Application.Interfaces.Servicos;
 using CarteiraInvest.Application.Seguranca;
 using Microsoft.AspNetCore.Identity;
@@ -11,17 +12,14 @@ namespace CarteiraInvest.Infra.Identidade;
 public class ServicoIdentidade : IServicoIdentidade
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IServicoToken _servicoToken;
     private readonly IServicoEmail _servicoEmail;
 
-    public ServicoIdentidade(UserManager<ApplicationUser> userManager, IServicoEmail servicoEmail)
+    public ServicoIdentidade(UserManager<ApplicationUser> userManager, IServicoToken servicoToken, IServicoEmail servicoEmail)
     {
         _userManager = userManager;
+        _servicoToken = servicoToken;
         _servicoEmail = servicoEmail;
-    }
-
-    public Task<bool> ConfirmarCadastroAsync(string usuarioId, string codigo)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<ResultadoCriacaoUsuario> CriarUsuarioAsync(string email, string senha)
@@ -91,5 +89,47 @@ public class ServicoIdentidade : IServicoIdentidade
         """;
 
         await _servicoEmail.EnviarAsync(usuario.Email, "Confirmação de Cadastro - CarteiraInvest", mensagem, CancellationToken.None);
+    }
+
+    public async Task<bool> ConfirmarCadastroAsync(string usuarioId, string codigo)
+    {
+        if(string.IsNullOrWhiteSpace(codigo) || string.IsNullOrWhiteSpace(usuarioId))
+            throw new ArgumentException("O código de confirmação e o ID do usuário não podem ser nulos ou vazios.", nameof(codigo));
+
+        var usuario = await _userManager.FindByIdAsync(usuarioId);
+
+        if(usuario is null)
+            throw new InvalidOperationException($"Usuário com ID '{usuarioId}' não encontrado.");
+
+        if(await _userManager.IsEmailConfirmedAsync(usuario))
+            throw new InvalidOperationException($"O e-mail do usuário com ID '{usuarioId}' já foi confirmado.");
+
+        var resultado = await _userManager.ConfirmEmailAsync(usuario, codigo);
+
+        return resultado.Succeeded;
+    }
+
+    public async Task<UsuarioLogadoDto> AutenticarUsuario(string email, string senha)
+    {
+        var usuario = await _userManager.FindByEmailAsync(email);
+
+        if (usuario is null)
+            throw new InvalidOperationException("Email ou senha inválidos.");
+
+        var passwordValid = await _userManager.CheckPasswordAsync(usuario, senha);
+
+        if (!passwordValid)
+            throw new InvalidOperationException("Email ou senha inválidos.");
+
+        var EmailConfirmado = await _userManager.IsEmailConfirmedAsync(usuario);
+
+        if (!EmailConfirmado)
+            throw new InvalidOperationException("Email não confirmado.");
+
+        var perfis = await _userManager.GetRolesAsync(usuario);
+
+        var token = await _servicoToken.GerarTokenAsync(usuario.Id, usuario.Email, perfis);
+
+        return new UsuarioLogadoDto(usuario.Id, token);
     }
 }

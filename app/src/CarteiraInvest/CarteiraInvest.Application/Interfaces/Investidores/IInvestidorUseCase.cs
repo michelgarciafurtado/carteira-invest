@@ -7,5 +7,7 @@ namespace CarteiraInvest.Application.Interfaces.Interfaces;
 
 public interface IInvestidorUseCase
 {
+    Task<bool> ConfirmarCadastroAsync(string usuarioId, string codigo);
     Task<InvestidorDto> CriarInvestidorAsync(CriarInvestidorDto criarInvestidorDto);
+   
 }

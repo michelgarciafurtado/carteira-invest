@@ -57,7 +57,14 @@ public class CriarInvestidorUseCase(IInvestidorRepository investidorRepository,
                                         endereco);
         var investidorCriado = await _investidorRepository.CriarInvestidorAsync(investidor);
 
+        await _servicoIdentidade.EnviarConfirmacaoCadastroAsync(usuarioCriado.UsuarioId);
+
         return new InvestidorDto(investidorCriado.IdentityUserId, investidorCriado.IdentityUserId);
+    }
+
+    public Task<bool> ConfirmarCadastroAsync(string usuarioId, string codigo)
+    {
+        return _servicoIdentidade.ConfirmarCadastroAsync(usuarioId, codigo);
     }
 
     private bool ValidarEmail(string? email)

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CarteiraInvest.Application.Interfaces.Identidade;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CarteiraInvest.Api.Controllers;
 
@@ -6,4 +7,10 @@ namespace CarteiraInvest.Api.Controllers;
 [ApiController]
 public class AutenticacaoController : ControllerBase
 {
+    private readonly IServicoIdentidade _servicoIdentidade;
+
+    public AutenticacaoController(IServicoIdentidade servicoIdentidade)
+    {
+        _servicoIdentidade = servicoIdentidade;
+    }
 }
