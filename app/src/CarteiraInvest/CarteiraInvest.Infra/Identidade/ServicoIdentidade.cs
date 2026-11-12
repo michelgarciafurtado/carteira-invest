@@ -3,6 +3,7 @@ using CarteiraInvest.Application.Interfaces.Identidade;
 using CarteiraInvest.Application.Interfaces.Servicos;
 using CarteiraInvest.Application.Seguranca;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;

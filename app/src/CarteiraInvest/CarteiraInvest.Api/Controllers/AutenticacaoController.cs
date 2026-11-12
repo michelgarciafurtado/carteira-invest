@@ -1,5 +1,6 @@
 ﻿using CarteiraInvest.Application.Dto;
 using CarteiraInvest.Application.Interfaces.Identidade;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarteiraInvest.Api.Controllers;
@@ -28,5 +29,16 @@ public class AutenticacaoController : ControllerBase
             return Unauthorized("E-mail ou senha inválidos.");
         }
         return Ok(usuarioLogado);
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult ObterUsuarioAutenticado()
+    {
+        return Ok(new
+        {
+            UsuarioId = User.FindFirst("sub")?.Value,
+            Email = User.FindFirst("email")?.Value
+        });
     }
 }
