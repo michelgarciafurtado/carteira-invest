@@ -117,6 +117,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddSwaggerGen(options =>
 {
+    //Configura o Swagger para gerar a documentação da API
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
@@ -128,7 +129,7 @@ builder.Services.AddSwaggerGen(options =>
             Email = "michelgarciafurtado@gmail.com"
         }
     });
-
+    //habilita a autenticação JWT no Swagger
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.Http,
@@ -136,7 +137,7 @@ builder.Services.AddSwaggerGen(options =>
         BearerFormat = "JWT",
         Description = "Informe somente o token JWT, sem o prefixo Bearer."
     });
-
+    //elimina a necessidade de informar o prefixo Bearer no Swagger
     options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
         [new OpenApiSecuritySchemeReference("Bearer", document)] = []
