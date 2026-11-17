@@ -17,6 +17,8 @@ public class Investidor:BaseEntity
     public IReadOnlyCollection<AcaoMonitorada> AcoesMonitoradas => _acoesMonitoradas.AsReadOnly();  
     public Endereco Endereco { get; private set; }
 
+    private Investidor() { } // Construtor privado para EF Core
+
     public Investidor(string identityUserId, string nome, string sobrenome, Endereco endereco)
     {
         if(string.IsNullOrWhiteSpace(identityUserId))
