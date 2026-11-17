@@ -12,6 +12,8 @@ using CarteiraInvest.Infra.Servicos.Email;
 using CarteiraInvest.Application.Interfaces.Servicos;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using CarteiraInvest.Integracoes.Brapi;
+using System.Net.Http.Headers;
 
 var builder = WebApplication.CreateBuilder(args);
 #region Configura o banco de dados e o Identity
@@ -49,6 +51,7 @@ builder.Services.AddScoped<IServicoEmail, ServicoEmailGmail>();
 builder.Services.AddOptions<ConfiguracaoEmail>()
     .Bind(builder.Configuration.GetSection("Email"));
 builder.Services.AddScoped<IServicoToken, ServicoToken>();
+builder.Services.AddScoped<IServicoCotacao, ServicoCotacao>();
 #endregion
 
 
@@ -114,6 +117,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.FromSeconds(30)
         };
     });
+
+builder.Services.AddHttpClient<BrapiClient>(c =>
+{
+    c.BaseAddress = new Uri("https://brapi.dev/");
+    c.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", builder.Configuration["Brapi:Token"]);
+    c.Timeout = TimeSpan.FromSeconds(15);
+});
 
 builder.Services.AddSwaggerGen(options =>
 {
