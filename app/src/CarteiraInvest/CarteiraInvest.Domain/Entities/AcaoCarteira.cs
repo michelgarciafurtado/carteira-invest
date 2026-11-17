@@ -7,7 +7,7 @@ using System.Text;
 
 namespace CarteiraInvest.Domain.Entities;
 
-public class AcaoCarteira:BaseEntity
+public class  AcaoCarteira:BaseEntity
 {
     public string Symbol { get; private set; }
     public Acao? Acao { get; private set; }

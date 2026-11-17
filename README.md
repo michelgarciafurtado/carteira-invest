@@ -24,12 +24,12 @@ Contara com cache Redis, PostgreSQL para armazenar informacoes das carteiras e I
 
 - [X] - `PRONTO` Modelagem de Domain
 - [X] - `PRONTO` Criacao de testes unitários
-- [/] - `DOING` Implementar IdentityDb
-- [ ] - Implementar Login e autenticação JWT
-- [ ] - Planejamento dos Endpoints (Miro)
+- [X] - `DOING` Implementar IdentityDb
+- [X] - Implementar Login e autenticação JWT
+- [/] - Planejamento dos Endpoints (Miro)
 - [ ] - Criação dos Endpoints
-- [ ] - Definição dos DTO de integracao e Domain 
-- [ ] - Integracao com API da Brapi
+- [X] - Definição dos DTO de integracao e Domain 
+- [X] - Integracao com API da Brapi
 - [ ] - Persistência dos dados 
 - [ ] - Criação do cache Redis
 - [ ] - Implementação dos UseCase

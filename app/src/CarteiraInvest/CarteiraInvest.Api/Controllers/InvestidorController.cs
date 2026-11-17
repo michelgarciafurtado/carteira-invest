@@ -45,4 +45,10 @@ public class InvestidorController(IInvestidorUseCase criarInvestidorUseCase) : C
         }
     }
 
+    [HttpPost("lancar-transacao")]
+    public async Task<IActionResult> LancarTransacaoAsync([FromBody] LancarTransacaoDto dto)
+    {
+        var resultado = await _carteiraUseCase.LancarTransacao();
+    }
+
 }
