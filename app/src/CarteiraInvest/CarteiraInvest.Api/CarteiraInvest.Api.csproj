@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CarteiraInvest.Infra\CarteiraInvest.Infra.csproj" />
+    <ProjectReference Include="..\CarteiraInvest.Integracoes.Brapi\CarteiraInvest.Integracoes.Brapi.csproj" />
   </ItemGroup>
 
 </Project>
